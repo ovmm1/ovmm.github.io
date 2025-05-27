@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Electro Parts Pro</title>
+  <style>
+    /* Reset y estilos base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.5;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    /* Encabezado y navegación */
+    .superior {
+      background-color: #b71c1c;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    header {
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+    header img {
+      height: 80px;
+      margin-bottom: 10px;
+    }
+    nav {
+      background-color: #e53935;
+      padding: 10px 0;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    nav a:hover {
+      opacity: 0.8;
+    }
+
+    /* Icono de carrito (header) */
+    .cart-icon-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+    }
+    .cart-icon {
+      width: 36px;
+      height: 36px;
+    }
+    .cart-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background-color: #ffeb3b;
+      color: #000;
+      font-size: 12px;
+      font-weight: bold;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Panel flotante de carrito */
+    #cartPanel {
+      display: none;
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      width: 300px;
+      max-height: 400px;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 1001;
+      overflow-y: auto;
+    }
+    #cartPanel h3 {
+      background-color: #c62828;
+      color: white;
+      padding: 10px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      font-size: 18px;
+    }
+    #cartItems {
+      list-style: none;
+      padding: 10px;
+    }
+    #cartItems li {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    #cartItems li button {
+      background: none;
+      border: none;
+      color: #c62828;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #cartPanel .shipping-info {
+      padding: 10px;
+      font-size: 14px;
+    }
+    #cartPanel .btn-checkout {
+      display: block;
+      width: calc(100% - 20px);
+      margin: 10px;
+      background-color: #43a047;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    #cartPanel .btn-checkout:hover {
+      opacity: 0.8;
+    }
+
+    /* Secciones ocultas/activas */
+    section {
+      display: none;
+      padding: 20px;
+    }
+    section.active {
+      display: block;
+    }
+
+    /* Home */
+    #inicio h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    #inicio p {
+      font-size: 1.1rem;
+    }
+
+    /* Catálogo */
+    .filtros {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .filtros select,
+    .filtros input {
+      padding: 10px;
+      font-size: 16px;
+      width: 200px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .cart-summary {
+      text-align: right;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .product {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      position: relative;
+    }
+    .product:hover {
+      transform: scale(1.02);
+    }
+    .product img {
+      height: 150px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+    .product h3 {
+      font-size: 18px;
+      margin: 10px 0 5px;
+    }
+    .product p.desc-corta {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    .product .price {
+      color: #c62828;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .product button {
+      background-color: #43a047;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    .product button:hover {
+      background-color: #388e3c;
+    }
+
+    /* Paginación */
+    .paginacion {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .paginacion button {
+      background-color: #c62828;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .paginacion button:hover {
+      opacity: 0.8;
+    }
+
+    /* Detalle de producto (modal simplificado / sección) */
+    #productoDetalle {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    #productoDetalle img {
+      width: 100%;
+      max-width: 350px;
+      object-fit: contain;
+      margin-bottom: 15px;
+    }
+    #productoDetalle h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    #productoDetalle .calificacion {
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #ffb400;
+    }
+    #productoDetalle .precio-detalle {
+      font-size: 22px;
+      color: #c62828;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    #productoDetalle p.descripcion-larga {
+      margin-bottom: 15px;
+      font-size: 15px;
+      color: #444;
+    }
+    #productoDetalle p.envio {
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    #productoDetalle .botones-detalle {
+      display: flex;
+      gap: 15px;
+    }
+    #productoDetalle button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    #productoDetalle .btn-volver {
+      background-color: #757575;
+      color: white;
+    }
+    #productoDetalle .btn-volver:hover {
+      opacity: 0.8;
+    }
+    #productoDetalle .btn-comprar {
+      background-color: #43a047;
+      color: white;
+    }
+    #productoDetalle .btn-comprar:hover {
+      opacity: 0.8;
+    }
+
+    /* Checkout (formulario de entrega) */
+    #checkout {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    #checkout h2 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    #checkout .form-checkout input,
+    #checkout .form-checkout select,
+    #checkout .form-checkout textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    #checkout .form-checkout button {
+      background-color: #c62828;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+    #checkout .form-checkout button:hover {
+      opacity: 0.8;
+    }
+
+    /* Sección “Nosotros” y “Contacto” */
+    #nosotros h2,
+    #contacto h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    #nosotros p {
+      font-size: 1.1rem;
+    }
+    .formulario input,
+    .formulario textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .formulario button {
+      background-color: #b71c1c;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    .formulario button:hover {
+      opacity: 0.8;
+    }
+    /* Opiniones de Clientes (sólo textarea) */
+    .opiniones {
+      margin-top: 20px;
+    }
+    .opiniones textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+      resize: vertical;
+    }
+
+    /* Pie de página */
+    footer {
+      background-color: #212121;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+
+    /* Botón de WhatsApp */
+    .whatsapp-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+    }
+    .whatsapp-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+    .whatsapp-icon:hover {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ENCABEZADO -->
+  <div class="superior">
+    <header>
+      <img src="prueva/elec.jpg" alt="Electro Parts Pro - Logo">
+      <h1>Electro Parts Pro</h1>
+      <p>Partes y herramientas dieléctricas para autos híbridos y eléctricos</p>
+
+      <!-- Icono de carrito con contador -->
+      <div class="cart-icon-container" onclick="toggleCartPanel()">
+        <img src="prueva/entrega-rapida.png" alt="Carrito" class="cart-icon" />
+        <div id="cartBadge" class="cart-badge">0</div>
+      </div>
+
+      <!-- Panel flotante de carrito -->
+      <div id="cartPanel">
+        <h3>Carrito de Compras</h3>
+        <ul id="cartItems">
+          <!-- productos en el carrito -->
+        </ul>
+        <div class="shipping-info">
+          <p><strong>Tiempo estimado de envío:</strong></p>
+          <p>• El Salvador: 1 - 3 días hábiles</p>
+          <p>• Resto de Centroamérica: 3 - 5 días hábiles</p>
+        </div>
+        <button class="btn-checkout" onclick="irAFormularioCheckout()">Ir a Checkout</button>
+      </div>
+    </header>
+    <nav>
+      <a onclick="mostrarSeccion('inicio')">Inicio</a>
+      <a onclick="mostrarSeccion('catalogo')">Catálogo</a>
+      <a onclick="mostrarSeccion('nosotros')">Nosotros</a>
+      <a onclick="mostrarSeccion('contacto')">Contacto</a>
+    </nav>
+  </div>
+
+  <!-- SECCIÓN INICIO -->
+  <section id="inicio" class="active">
+    <h2>Bienvenido a Electro Parts Pro</h2>
+    <p>Tu tienda confiable en El Salvador para repuestos y herramientas especializadas en autos eléctricos e híbridos. ¡Explora nuestro catálogo y encuentra justo lo que necesitas para tu vehículo!</p>
+  </section>
+
+  <!-- SECCIÓN CATÁLOGO -->
+  <section id="catalogo">
+    <h2>Catálogo de Productos</h2>
+    <div class="filtros">
+      <select id="filtroTipo" onchange="actualizarVista()">
+        <option value="">Tipo de producto</option>
+        <option value="herramienta">Herramienta</option>
+        <option value="repuesto">Repuesto</option>
+      </select>
+      <select id="filtroPrecio" onchange="actualizarVista()">
+        <option value="">Rango de precio</option>
+        <option value="1">$0 - $50</option>
+        <option value="2">$51 - $100</option>
+        <option value="3">$101+</option>
+      </select>
+      <input type="text" id="busqueda" placeholder="Buscar productos" oninput="actualizarVista()"/>
+    </div>
+
+    <div class="cart-summary">
+      <strong>Total carrito:</strong> $<span id="carritoTotal">0.00</span>
+    </div>
+
+    <div class="product-grid" id="productGrid">
+      <!-- colocacion de los productos -->
+    </div>
+
+    <div class="paginacion">
+      <button onclick="anteriorPagina()">Anterior</button>
+      <button onclick="siguientePagina()">Siguiente</button>
+    </div>
+  </section>
+
+  <!-- SECCIÓN DETALLE DE PRODUCTO -->
+  <section id="detalleProducto">
+    <div id="productoDetalle">
+      <button class="btn-volver" style="position:absolute; top:10px; right:10px;" onclick="cerrarDetalle()">✕</button>
+      <div style="display:flex; flex-wrap:wrap; gap:20px;">
+        <div style="flex:1; min-width:300px;">
+          <img id="imgDetalle" src="" alt="Imagen Producto"/>
+        </div>
+        <div style="flex:2; min-width:300px;">
+          <h2 id="nombreDetalle">Nombre Producto</h2>
+          <div class="calificacion" id="calificacionDetalle">★★★★★ (4.5)</div>
+          <div class="precio-detalle" id="precioDetalle">$0.00</div>
+          <p class="descripcion-larga" id="descripcionDetalle">Descripción extensa del producto...</p>
+          <p class="envio">Envío: 1 - 3 días hábiles</p>
+          <div class="botones-detalle">
+            <button class="btn-comprar" id="btnComprarDetalle">Comprar Ahora</button>
+            <button class="btn-volver" onclick="cerrarDetalle()">Volver al Catálogo</button>
+          </div>
+          <div style="margin-top:15px;">
+            <h3>Reseñas de Clientes</h3>
+            <ul id="reseñasDetalle" style="list-style: disc; margin-left: 20px;">
+              <!-- Reseñas dinámicas no funcional aun  -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN CHECKOUT (Formulario de entrega) falta mejorar -->
+  <section id="checkout">
+    <div id="checkoutFormContainer">
+      <h2>Datos de Entrega</h2>
+      <form class="form-checkout" onsubmit="confirmarPedido(event)">
+        <label for="nombreCliente">Nombre Completo:</label>
+        <input type="text" id="nombreCliente" name="nombreCliente" placeholder="Tu nombre completo" required/>
+
+        <label for="correoCliente">Correo Electrónico:</label>
+        <input type="email" id="correoCliente" name="correoCliente" placeholder="Tu correo electrónico" required/>
+
+        <label for="telefonoCliente">Teléfono (WhatsApp):</label>
+        <input type="tel" id="telefonoCliente" name="telefonoCliente" placeholder="+503 7XXXXXXX" required/>
+
+        <label for="direccion1">Dirección:</label>
+        <input type="text" id="direccion1" name="direccion1" placeholder="Calle, Colonia, Barrio" required/>
+
+        <label for="ciudadCliente">Ciudad:</label>
+        <input type="text" id="ciudadCliente" name="ciudadCliente" placeholder="San Salvador" required/>
+
+        <label for="departamentoCliente">Departamento:</label>
+        <select id="departamentoCliente" name="departamentoCliente" required>
+          <option value="">Selecciona departamento</option>
+          <option value="San Salvador">San Salvador</option>
+          <option value="La Libertad">La Libertad</option>
+          <option value="Santa Ana">Santa Ana</option>
+          <option value="Sonsonate">Sonsonate</option>
+          <!-- faltan más departamentos  -->
+        </select>
+
+        <label for="instrucciones">Instrucciones de Entrega (opcional):</label>
+        <textarea id="instrucciones" name="instrucciones" rows="3" placeholder="Ej. Punto de referencia, horario preferido..."></textarea>
+
+        <button type="submit">Confirmar Pedido</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- SECCIÓN NOSOTROS -->
+  <section id="nosotros">
+    <h2>Sobre Nosotros</h2>
+    <p>Electro Parts Pro nace en El Salvador con el propósito de facilitar el acceso a herramientas y repuestos especializados para vehículos eléctricos e híbridos. Contamos con productos certificados, atención profesional y asesoría personalizada. Nuestro equipo está formado por técnicos especializados en sistemas de alta tensión y componentes eléctricos, garantizando calidad y seguridad en cada venta.</p>
+  </section>
+
+  <!-- SECCIÓN CONTACTO -->
+  <section id="contacto">
+    <h2>Contáctanos</h2>
+    <form class="formulario" onsubmit="enviarMensaje(event)">
+      <input type="text" name="nombre" placeholder="Tu nombre" required/>
+      <input type="email" name="correo" placeholder="Tu correo electrónico" required/>
+      <textarea name="mensaje" rows="5" placeholder="Escribe tu mensaje aquí..." required></textarea>
+      <button type="submit">Enviar mensaje</button>
+    </form>
+
+    <div class="opiniones">
+      <h3>Opiniones de Clientes</h3>
+      <textarea rows="3" placeholder="Escribe tu opinión aquí..."></textarea>
+    </div>
+  </section>
+
+  <!-- PIE DE PÁGINA -->
+  <footer>
+    <p>&copy; 2025 Electro Parts Pro - Todos los derechos reservados</p>
+    <p>Tel: +503 6133-2625 | Email: aqualuxcare@gmail.com</p>
+  </footer>
+
+  <!-- Botón de WhatsApp funcional numero de adr-->
+  <a href="https://wa.me/50361332625" target="_blank" class="whatsapp-button" title="Contáctanos por WhatsApp">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
+  </a>
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script>
+    // LISTA DE PRODUCTOS MEJORADA falta capeta de imagenes 
+    const productos = [
+      {
+        id: 1,
+        nombre: "Llave Dieléctrica Profesional",
+        descripcionCorta: "Herramienta segura para sistemas de alto voltaje",
+        descripcionLarga: "Llave dieléctrica de 12\" con aislamiento reforzado para trabajos en sistemas de alto voltaje de autos híbridos y eléctricos. Su recubrimiento especial garantiza seguridad y durabilidad. Apta para tornillos de hasta 22 mm. Incluye garantía de 1 año.",
+        tipo: "herramienta",
+        precio: 35.99,
+        imagen: "https://via.placeholder.com/300x300?text=Llave+Dieléctrica",
+        calificacion: 4.5,
+        reseñas: [
+          "Excelente producto, muy resistente (★★★★☆)",
+          "Me salvó en varios mantenimientos, recomendada. (★★★★★)",
+          "Buena calidad, aunque un poco cara. (★★★☆☆)"
+        ]
+      },
+      {
+        id: 2,
+        nombre: "Escáner OBD2 Pro E-Vehicle",
+        descripcionCorta: "Diagnóstico avanzado para autos híbridos",
+        descripcionLarga: "Escáner OBD2 específicamente calibrado para vehículos híbridos y eléctricos. Lee códigos de batería, motor eléctrico, inversor y permite reiniciar fallas. Incluye cable USB y software compatible con Windows y Android. Actualizaciones gratuitas de firmware.",
+        tipo: "herramienta",
+        precio: 89.99,
+        imagen: "https://via.placeholder.com/300x300?text=Escáner+OBD2+Pro",
+        calificacion: 4.7,
+        reseñas: [
+          "Detecta fallas que mi viejo escáner no veía. (★★★★★)",
+          "Muy preciso, pero demora un poco en conectar. (★★★★☆)"
+        ]
+      },
+      {
+        id: 3,
+        nombre: "Sensor de Corriente CC (0-200A)",
+        descripcionCorta: "Sensor para monitoreo de baterías de alto voltaje",
+        descripcionLarga: "Sensor de corriente contínua (0-200A) para sistemas de batería de autos eléctricos. Montable en riel de 35 mm DIN. Compatible con módulos de telemetría y pantallas digitales. Precisión de ±1.5%.",
+        tipo: "repuesto",
+        precio: 42.50,
+        imagen: "https://via.placeholder.com/300x300?text=Sensor+Corriente",
+        calificacion: 4.3,
+        reseñas: [
+          "Funciona bien, buena precisión. (★★★★☆)",
+          "Instalación sencilla, cumple su función. (★★★★☆)"
+        ]
+      },
+      {
+        id: 4,
+        nombre: "Módulo de Inversor de 48V",
+        descripcionCorta: "Convierte CC a CA para sistemas auxiliares",
+        descripcionLarga: "Inversor de 48V a 230V con potencia de salida de 1000W continuo, ideal para alimentar herramientas auxiliares en talleres móviles de autos eléctricos. Incluye protecciones de sobrecarga, corto circuito y temperatura. Carcasa de aluminio.",
+        tipo: "repuesto",
+        precio: 120.00,
+        imagen: "https://via.placeholder.com/300x300?text=Módulo+Inversor",
+        calificacion: 4.6,
+        reseñas: [
+          "Perfecto para mi taller móvil, salida estable. (★★★★★)",
+          "Un poco grande, pero la construcción es sólida. (★★★★☆)"
+        ]
+      },
+      {
+        id: 5,
+        nombre: "Juego de Guantes Dieléctricos 1000V",
+        descripcionCorta: "Protección total para trabajos eléctricos",
+        descripcionLarga: "Guantes dieléctricos certificados hasta 1000V clase 0, con forro interno para mayor comodidad. Resistentes a arañazos y sustancias químicas. Incluye bolsa de almacenamiento y parches de prueba. Ideal para trabajos en baterías y componentes de alto voltaje.",
+        tipo: "herramienta",
+        precio: 29.75,
+        imagen: "https://via.placeholder.com/300x300?text=Guantes+Dieléctricos",
+        calificacion: 4.2,
+        reseñas: [
+          "Cómodos y seguros, cumplen con norma IEC 60903. (★★★★☆)",
+          "Ideal para trabajos prolongados, buen agarre. (★★★★★)"
+        ]
+      },
+      {
+        id: 6,
+        nombre: "Freno Regenerativo Eléctrico",
+        descripcionCorta: "Kit de freno regenerativo para autos clásicos",
+        descripcionLarga: "Kit completo de freno regenerativo para conversiones de autos clásicos a eléctricos. Incluye controladora, sensores y cables. Recupera hasta el 15% de energía en frenadas. Compatible con sistemas de 48V a 72V.",
+        tipo: "repuesto",
+        precio: 250.00,
+        imagen: "https://via.placeholder.com/300x300?text=Freno+Regenerativo",
+        calificacion: 4.4,
+        reseñas: [
+          "Funciona muy bien en mi conversión EV. (★★★★☆)",
+          "Buena recuperación de energía, sencillo de instalar. (★★★★★)"
+        ]
+      },
+      {
+        id: 7,
+        nombre: "Manómetro Digital de Alta Precisión",
+        descripcionCorta: "Mide presión en sistemas de aire comprimido",
+        descripcionLarga: "Manómetro digital para sistemas de aire en frenos de vehículos híbridos. Rango de medición 0-250 psi, resolución de 0.1 psi. Pantalla retroiluminada, con función de retención de lectura. Alimentación por batería recargable.",
+        tipo: "herramienta",
+        precio: 55.00,
+        imagen: "https://via.placeholder.com/300x300?text=Manómetro+Digital",
+        calificacion: 4.6,
+        reseñas: [
+          "Muy preciso, ideal para frenos neumáticos. (★★★★☆)",
+          "Pantalla clara, batería dura bastante. (★★★★★)"
+        ]
+      },
+      {
+        id: 8,
+        nombre: "Sensor de Temperatura MAF",
+        descripcionCorta: "Sensor de flujo y temperatura del aire",
+        descripcionLarga: "Sensor MAF (Mass Air Flow) con medición de temperatura integrado, compatible con sistemas FI en autos híbridos y eléctricos con generador de respaldo. Rango de 0-200 g/s, salida analógica, con conector estándar Bosch 4 Pines.",
+        tipo: "repuesto",
+        precio: 65.00,
+        imagen: "https://via.placeholder.com/300x300?text=Sensor+MAF",
+        calificacion: 4.3,
+        reseñas: [
+          "Se adaptó perfectamente a mi proyecto, muy confiable. (★★★★☆)",
+          "Buena respuesta, calibración sencilla. (★★★★☆)"
+        ]
+      }
+      // agregar más productos en el mismo formato...
+    ];
+
+    let paginaActual = 1;
+    const productosPorPagina = 8;
+    let carrito = [];
+
+    // Mostrar productos en la parte de catálogo
+    function mostrarProductos() {
+      const filtroTipo = document.getElementById("filtroTipo").value;
+      const filtroPrecio = document.getElementById("filtroPrecio").value;
+      const busqueda = document.getElementById("busqueda").value.toLowerCase();
+
+      let filtrados = productos.filter(p => {
+        const coincideTipo = !filtroTipo || p.tipo === filtroTipo;
+        const coincidePrecio =
+          !filtroPrecio ||
+          (filtroPrecio == 1 && p.precio <= 50) ||
+          (filtroPrecio == 2 && p.precio > 50 && p.precio <= 100) ||
+          (filtroPrecio == 3 && p.precio > 100);
+        const coincideTexto =
+          p.nombre.toLowerCase().includes(busqueda) ||
+          p.descripcionCorta.toLowerCase().includes(busqueda);
+        return coincideTipo && coincidePrecio && coincideTexto;
+      });
+
+      const inicio = (paginaActual - 1) * productosPorPagina;
+      const paginados = filtrados.slice(inicio, inicio + productosPorPagina);
+
+      const grid = document.getElementById("productGrid");
+      if (paginados.length === 0) {
+        grid.innerHTML = "<p>No hay productos que coincidan con la búsqueda.</p>";
+        return;
+      }
+      grid.innerHTML = paginados
+        .map(
+          p => `
+        <div class="product">
+          <img src="${p.imagen}" alt="${p.nombre}">
+          <h3>${p.nombre}</h3>
+          <p class="desc-corta">${p.descripcionCorta}</p>
+          <p class="price">$${p.precio.toFixed(2)}</p>
+          <button onclick="verDetalle(${p.id})">Ver Detalles</button>
+        </div>
+      `
+        )
+        .join("");
+    }
+
+    // Paginación
+    function anteriorPagina() {
+      if (paginaActual > 1) {
+        paginaActual--;
+        mostrarProductos();
+      }
+    }
+    function siguientePagina() {
+      const totalFiltrados = productos.filter(p => {
+        const filtroTipo = document.getElementById("filtroTipo").value;
+        const filtroPrecio = document.getElementById("filtroPrecio").value;
+        const busqueda = document.getElementById("busqueda").value.toLowerCase();
+        const coincideTipo = !filtroTipo || p.tipo === filtroTipo;
+        const coincidePrecio =
+          !filtroPrecio ||
+          (filtroPrecio == 1 && p.precio <= 50) ||
+          (filtroPrecio == 2 && p.precio > 50 && p.precio <= 100) ||
+          (filtroPrecio == 3 && p.precio > 100);
+        const coincideTexto =
+          p.nombre.toLowerCase().includes(busqueda) ||
+          p.descripcionCorta.toLowerCase().includes(busqueda);
+        return coincideTipo && coincidePrecio && coincideTexto;
+      }).length;
+      const totalPaginas = Math.ceil(totalFiltrados / productosPorPagina);
+      if (paginaActual < totalPaginas) {
+        paginaActual++;
+        mostrarProductos();
+      }
+    }
+
+    // Agregar al carrito
+    function agregarAlCarrito(id) {
+      const prod = productos.find(p => p.id === id);
+      carrito.push(prod);
+      actualizarCarrito();
+      alert(`"${prod.nombre}" agregado al carrito.`);
+    }
+    // Quitar del carrito
+    function quitarDelCarrito(index) {
+      carrito.splice(index, 1);
+      actualizarCarrito();
+    }
+
+    // Actualizar visual de carrito (badge y panel)
+    function actualizarCarrito() {
+      // Actualizar badge
+      document.getElementById("cartBadge").innerText = carrito.length;
+
+      // Actualizar total en Catálogo
+      const total = carrito.reduce((sum, p) => sum + p.precio, 0);
+      document.getElementById("carritoTotal").innerText = total.toFixed(2);
+
+      // Actualizar lista en panel flotante
+      const ul = document.getElementById("cartItems");
+      if (carrito.length === 0) {
+        ul.innerHTML = "<li>No hay productos en el carrito.</li>";
+      } else {
+        ul.innerHTML = carrito
+          .map(
+            (p, index) => `
+            <li>
+              ${p.nombre} - $${p.precio.toFixed(2)}
+              <button onclick="quitarDelCarrito(${index})">✕</button>
+            </li>
+          `
+          )
+          .join("");
+      }
+    }
+
+    // Mostrar/ocultar panel de carrito
+    function toggleCartPanel() {
+      const panel = document.getElementById("cartPanel");
+      panel.style.display = panel.style.display === "block" ? "none" : "block";
+    }
+
+    // Ir a sección de formulario
+    function irAFormularioCheckout() {
+      // Si no hay productos, avisar
+      if (carrito.length === 0) {
+        alert("Tu carrito está vacío.");
+        return;
+      }
+      // Cerrar panel flotante
+      document.getElementById("cartPanel").style.display = "none";
+      // Mostrar sección formulario
+      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+      document.getElementById("checkout").classList.add("active");
+    }
+
+    // Confirmar pedido (simulación)
+    function confirmarPedido(e) {
+      e.preventDefault();
+      // Aquí podrías enviar los datos a tu servidor
+      alert("¡Pedido confirmado! Pronto nos pondremos en contacto para coordinar la entrega.");
+      // Limpiar carrito y formulario
+      carrito = [];
+      actualizarCarrito();
+      e.target.reset();
+      mostrarSeccion("inicio");
+    }
+
+    // Mostrar sección activa
+    function mostrarSeccion(id) {
+      // Cerrar panel de carrito si está abierto
+      document.getElementById("cartPanel").style.display = "none";
+      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      if (id === "catalogo") {
+        paginaActual = 1;
+        mostrarProductos();
+      }
+    }
+
+    // VER DETALLE DE PRODUCTO
+    function verDetalle(id) {
+      const prod = productos.find(p => p.id === id);
+      if (!prod) return;
+
+      document.getElementById("imgDetalle").src = prod.imagen;
+      document.getElementById("imgDetalle").alt = prod.nombre;
+      document.getElementById("nombreDetalle").innerText = prod.nombre;
+      document.getElementById("calificacionDetalle").innerText =
+        "★".repeat(Math.floor(prod.calificacion)) +
+        (prod.calificacion % 1 >= 0.5 ? "½" : "") +
+        " (" + prod.calificacion.toFixed(1) + ")";
+      document.getElementById("precioDetalle").innerText = "$" + prod.precio.toFixed(2);
+      document.getElementById("descripcionDetalle").innerText = prod.descripcionLarga;
+
+      const ulReseñas = document.getElementById("reseñasDetalle");
+      ulReseñas.innerHTML = prod.reseñas.map(r => `<li>${r}</li>`).join("");
+
+      const btnComprar = document.getElementById("btnComprarDetalle");
+      btnComprar.onclick = () => {
+        agregarAlCarrito(prod.id);
+      };
+
+      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+      document.getElementById("detalleProducto").classList.add("active");
+    }
+
+    // Cerrar detalle y volver al catálogo
+    function cerrarDetalle() {
+      mostrarSeccion("catalogo");
+    }
+
+    // Actualizar vista al cambiar filtros o búsqueda
+    function actualizarVista() {
+      paginaActual = 1;
+      mostrarProductos();
+    }
+
+    // Enviar mensaje de contacto (simulado)
+    function enviarMensaje(e) {
+      e.preventDefault();
+      alert("Gracias por tu mensaje. Nos pondremos en contacto pronto.");
+      e.target.reset();
+    }
+
+    // Al cargar la página, mostrar “Inicio”
+    window.onload = () => {
+      mostrarSeccion("inicio");
+      actualizarCarrito();
+    };
+  </script>
+</body>
+</html>
